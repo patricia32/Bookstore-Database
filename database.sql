@@ -1,0 +1,223 @@
+USE Bookstore;
+
+CREATE TABLE CARTE (
+    ID_CARTE INT IDENTITY(1,1) PRIMARY KEY,
+    TITLU VARCHAR(25),
+    AUTOR VARCHAR(20),
+    GEN VARCHAR(15),
+    PRET INT,
+    TIP VARCHAR(15),
+    NR_PAGINI INT,
+    AN_APARITIE INT,
+	VALABILITATE_ZILE BIGINT);
+
+ALTER TABLE CARTE
+ADD CONSTRAINT CK_TIP CHECK (TIP IN ('audiobook', 'ebook'));
+
+
+CREATE TABLE PERSOANA (
+	ID_PERSOANA INT IDENTITY(1,1) PRIMARY KEY,
+    NUME VARCHAR(20),
+    USERNAME VARCHAR(30),
+    PAROLA VARCHAR(30),
+    ROL VARCHAR(10),
+    ADRESA VARCHAR(20),
+    DATA_NASTERE DATE,
+    VARSTA INTEGER,
+    BUGET INTEGER,
+    EMAIL VARCHAR(30),
+    CARD_FIDELITATE INTEGER);
+
+CREATE TABLE SUBTITRARE (
+	ID_SUBTITRARE INT IDENTITY(1,1) PRIMARY KEY,
+    LIMBA VARCHAR(10),
+    FONT VARCHAR(10),
+    DIMENSIUNE_FONT INTEGER,
+    STIL VARCHAR(10));
+
+ALTER TABLE SUBTITRARE ADD CONSTRAINT SK_STIL CHECK (STIL IN ('BOLD', 'ITALIC', 'BASIC'));
+    
+CREATE TABLE FILM (
+	ID_FILM INT IDENTITY(1,1) PRIMARY KEY,
+    TITLU VARCHAR(30),
+    GEN VARCHAR(10),
+    VALABILITATE_ZILE INTEGER,
+    TIP VARCHAR(10),
+    AN_APARITIE INT,
+    RATING DECIMAL(3,1),
+    LIMBA_AUDIO VARCHAR(10),
+    REGIZOR VARCHAR(20),
+    DURATA_MINUTE INTEGER,
+    ID_SUBTITRARE INTEGER,
+    FOREIGN KEY(ID_SUBTITRARE) REFERENCES SUBTITRARE(ID_SUBTITRARE));
+
+CREATE TABLE INCHIRIERE (
+	ID_INCHIRIERE INT IDENTITY(1,1) PRIMARY KEY,
+    DATA_INCHIRIERE DATE,
+    ID_PERSOANA INTEGER,
+    ID_CARTE INTEGER,
+    ID_FILM INTEGER,
+    FOREIGN KEY(ID_PERSOANA) REFERENCES PERSOANA(ID_PERSOANA),
+    FOREIGN KEY(ID_CARTE) REFERENCES CARTE(ID_CARTE),
+    FOREIGN KEY(ID_FILM) REFERENCES FILM(ID_FILM));
+
+USE Bookstore;
+INSERT INTO INCHIRIERE(DATA_INCHIRIERE, ID_PERSOANA, ID_CARTE, ID_FILM) VALUES ('2021-01-07', 1, 5, NULL);
+
+
+CREATE TABLE FACTURA (
+	ID_FACTURA INT IDENTITY(1,1) PRIMARY KEY,
+    DATA_FACTURARE DATE,
+    ORA_FACTURARE TIME,
+    REDUCERE_ACORDATA DECIMAL(6,2),
+    TOTAL DECIMAL(6,2));
+
+CREATE TABLE ZIAR (
+	ID_ZIAR INT IDENTITY(1,1) PRIMARY KEY,
+    TITLU VARCHAR(30),
+    JOCURI BIT,
+    TIP VARCHAR(10),
+    PRET DECIMAL(6,2),
+    CATEGORIE_VARSTA VARCHAR(20),
+    GEN VARCHAR(15),
+    NUMAR_PAGINI INTEGER,
+    DIMENSIUNE VARCHAR(10),
+    STOC INTEGER,
+    CADOU VARCHAR(10),
+    EDITIE INTEGER);
+
+ALTER TABLE ZIAR ADD CONSTRAINT ZK_TIP CHECK (TIP IN ('MONOCROM', 'COLOR'));
+
+CREATE TABLE JOCURI ( 
+	ID_JOC INT IDENTITY(1,1) PRIMARY KEY,
+    NUME VARCHAR(30),
+    TIP_EDITIE VARCHAR(15),
+    NR_JUCATORI VARCHAR(15),
+    RATING_PEGI INTEGER,
+    COMPATIBILITATE VARCHAR(15),
+    TIP VARCHAR(10),
+    PRET INTEGER,
+    STOC INTEGER);
+    
+ALTER TABLE JOCURI ADD CONSTRAINT JK_EDITIE CHECK (TIP_EDITIE IN ('STANDARD', 'PREMIUM'));
+ALTER TABLE JOCURI ADD CONSTRAINT JK_NR_JUCATORI CHECK (NR_JUCATORI IN ('SINGLE PLAYER', 'MULTIPLAYER', 'CO-OP'));
+
+CREATE TABLE RECHIZITE (
+	ID_PRODUS INT IDENTITY(1,1) PRIMARY KEY,
+    NUME VARCHAR(15),
+    BRAND VARCHAR(10),
+    PRET INTEGER,
+    STOC INTEGER,
+    GRAMAJ DECIMAL(6,2));
+
+CREATE TABLE CUMPARARE (
+	ID_CUMPARARE INT IDENTITY(1,1) PRIMARY KEY,
+    ID_PERSOANA INTEGER,
+    ID_ZIAR INTEGER,
+    ID_PRODUS INTEGER,
+    ID_JOC INTEGER,
+    ID_FACTURA INTEGER,
+    FOREIGN KEY(ID_PERSOANA) REFERENCES PERSOANA(ID_PERSOANA),
+    FOREIGN KEY(ID_ZIAR) REFERENCES ZIAR(ID_ZIAR),
+    FOREIGN KEY(ID_PRODUS) REFERENCES RECHIZITE(ID_PRODUS),
+    FOREIGN KEY(ID_JOC) REFERENCES JOCURI(ID_JOC),
+    FOREIGN KEY(ID_FACTURA) REFERENCES FACTURA(ID_FACTURA));
+
+INSERT INTO CARTE(TITLU, AUTOR, GEN, VALABILITATE_ZILE, TIP, NR_PAGINI, AN_APARITIE, PRET) VALUES
+    ('NIGHTFALL', 'DEN PATRICK', 'AVENTURA', 14, 'AUDIOBOOK', 432, 2021, 45),
+    ('DEX', 'IORGU IORDAN', 'DICTIONAR', 14, 'EBOOK', 1376, 2016, 73),
+    ('UMANII', 'MATT HAIG', 'SF', 14, 'EBOOK', 344, 2020, 26),
+    ('IERBURI UITATE', 'MONA PETRE', 'CULINAR', 7, 'EBOOK', 288, 2021, 30),
+    ('DISPARITIA', 'COSMIN PERTA', 'CRIMA', 7, 'AUDIOBOOK', 144, 2017, 34),
+    ('TROIA', 'STEPHEN FRY', 'ISTORIE', 15, 'EBOOK', 432, 2000, 42),
+    ('IMPLINIREA', 'SYLVIA DAY', 'ROMANCE', 14, 'AUDIOBOOK', 384, 1990, 45),
+    ('CAPCANA INTELIGENTEI', 'DAVID ROBSON', 'PSIHOLOGIE', 7, 'EBOOK', 394, 2007, 56),
+    ('INFIDELII', 'DANIELA FAUR', 'ROMANCE', 14, 'AUDIOBOOK', 312, 2010, 32);
+
+
+INSERT INTO ZIAR(TITLU, JOCURI, TIP, PRET, CATEGORIE_VARSTA, GEN, NUMAR_PAGINI, DIMENSIUNE, STOC, CADOU, EDITIE) VALUES
+	('PROFITUL AGRICOL', 1, 'COLOR', 7, 'ADULT', 'CULTURA', 48, '45X30', 30, NULL, 13),
+    ('CARTICICA PRACTICA', 1, 'COLOR', 13, 'ADULT', 'CULINAR', 12, '45X30', 13, 'POLONIC', 2),
+    ('ELECTRONICA', 1, 'MONOCROM', 23, 'ADULT', 'IT', 10, '45X30', 23, NULL , 54),
+    ('ECONOMISTUL', 1, 'COLOR', 30, 'ADULT', 'CONTABILITATE', 15, '45X30', 34, 'PIXURI', 12),
+    ('LUXURY', 0, 'COLOR', 20, 'ADULT', 'CONTABILITATE', 34, '45X30', 22, 'STICKERE', 9),
+    ('BARBIE', 1, 'COLOR', 23, 'COPII', 'ANIMATIE', 34, '45X30', 45, 'PAPUSA', 78),
+    ('CARS', 1, 'COLOR', 14, 'COPII', 'ANIMATIE', 31, '45X30', 21, 'MASINUTA', 24);
+
+INSERT INTO JOCURI(NUME, TIP_EDITIE, NR_JUCATORI, RATING_PEGI, COMPATIBILITATE, TIP, PRET, STOC) VALUES
+	('METROID', 'PREMIUM', 'SINGLE PLAYER', 10, 'NINTENDO', 'AVENTURA', 252, 12),
+    ('HORIZON', 'STANDARD', 'SINGLE PLAYER', 16, 'PLAY STATION', 'AVENTURA', 400, 23),
+    ('FORTNITE', 'PREMIUM', 'MULTIPLAYER', 12, 'XBOX ONE', 'ACTIUNE', 140, 23),
+    ('BEN TEN', 'STANDARD', 'SINGLE PLAYER', 7, 'PLAY STATION', 'AVENTURA', 100, 29),
+    ('MINECRAFT', 'STANDARD', 'SINGLE PLAYER', 7, 'XBOX ONE', 'AVENTURA', 150, 8),
+    ('SPIDERMAN', 'PREMIUM', 'SINGLE PLAYER', 16, 'PLAY STATION', 'AVENTURA', 129, 13),
+    ('CALL OF DUTY', 'PREMIUM', 'CO-OP', 18, 'XBOX ONE', 'SHOOTER', 50, 10);
+
+INSERT INTO RECHIZITE(NUME, BRAND, PRET, STOC, GRAMAJ) VALUES
+	('CAIET', 'PIGNA', 5, 34, 45),
+    ('CAIET MARE', 'DACO', 7, 72, 100),
+    ('COPERTA', 'DACO', 2, 23, 12),
+    ('LIPICI', 'PIGNA', 8, 21, 50),
+    ('CARIOCI', 'DACO', 38, 13, 200),
+    ('CREIOANE', 'HERLITZ', 28, 28, 100),
+    ('PIX', 'DACO', 4, 299, 12),
+    ('STILOU', 'HERLITZ', 29, 19, 49),
+    ('MARKER', 'DACO', 4, 32, 12),
+    ('FOI', 'HERLITZ', 20, 23, 500),
+    ('RADIERA', 'DACO', 9, 42, 30),
+    ('ASCUTITOARE', 'HERLITZ', 12, 233, 32);
+
+INSERT INTO SUBTITRARE(LIMBA, FONT, DIMENSIUNE_FONT, STIL) VALUES
+	('ROMANA', 'ARIAL', 25, 'ITALIC'),
+    ('ENGLEZA', 'ARIAL', 24, 'BOLD'),
+    ('FRANCEZA', 'CALIBRI', 26, 'ITALIC'),
+    ('ITALIANA', 'ARIAL', 24, 'BOLD'),
+    ('SPANIOLA', 'ARIAL', 25, 'BOLD'),
+    ('GERMANA', 'CALIBRI', 23, 'ITALIC');
+
+INSERT INTO FILM(TITLU, GEN, VALABILITATE_ZILE, TIP, AN_APARITIE, RATING, LIMBA_AUDIO, REGIZOR, DURATA_MINUTE, ID_SUBTITRARE) VALUES
+	('APROPAPE DE CER', 'DOCUMENTAR', 14, 'MONOCROM', '2010', 8.0, 'ENGLEZA', 'TITUS FASCHIN', 93, 6),
+    ('PAPERTOWNS', 'DRAMA', 14, 'COLOR', '2015', 7.1, 'FRANCEZA', 'JAKE SCHREIER', 109, 4),
+    ('BAD HAIR', 'COMEDIE', 7, 'COLOR', '2007', 4.1, 'ROMANA', 'JUSTIN SIMIEN', 115, NULL),
+    ('AVA', 'ACTIUNE', 6, 'COLOR', '2021', 6.2, 'ENGLEZA', 'TATE TAYLOR', 96, 1),
+    ('RUN', 'HORROR', 3, 'MONOCROM', '2017', 8.6, 'SPANIOLA', 'SARA PAULSON', 90, 6),
+    ('SOUL', 'ANIMATIE', 6, 'MONOCROM', '2019', 7.2, 'ENGLEZA', 'PETE DOCTER', 100, 3),
+    ('SCOOB', 'ANIMATIE', 3, 'COLOR', '2018', 6.2, 'ROMANA', 'TITUS FASCHIN', 102, 2),
+    ('THE PROM', 'COMEDIE', 4, 'COLOR', '2014', 9.2, 'ITALIANA', 'JAMES CORDEN', 90, 5),
+    ('MY SPY', 'ACTIUNE', 2, 'COLOR', '2009', 10.0, 'ENGLEZA', 'PETER SEGAL', 107, 1),
+    ('SCREAM', 'HORROR', 4,' COLOR', '2010', 8.0, 'GERMANA', 'TAYLOR COX', 99, 1);
+
+INSERT INTO PERSOANA (NUME, USERNAME, PAROLA, ROL, ADRESA, DATA_NASTERE, VARSTA, BUGET, EMAIL, CARD_FIDELITATE)
+VALUES
+    ('Emma White', 'emma_white', 'password11', 'User', '808 Lemon St', '1991-03-08', 31, 980, 'emma.white@email.com', 544),
+    ('Daniel Taylor', 'daniel_taylor', 'password12', 'User', '909 Grape St', '1996-09-15', 26, 870, 'daniel.taylor@email.com', 234),
+    ('Mia Martin', 'mia_martin', 'password13', 'User', '111 Cherry St', '1989-05-22', 34, 1150, 'mia.martin@email.com', 433),
+    ('Jacob Harris', 'jacob_harris', 'password14', 'User', '222 Banana St', '2002-11-30', 21, 890, 'jacob.harris@email.com', 25),
+    ('Ava Moore', 'ava_moore', 'password15', 'User', '333 Raspberry St', '1997-07-18', 25, 920, 'ava.moore@email.com', 6),
+    ('Liam Clark', 'liam_clark', 'password16', 'User', '444 Blueberry St', '1984-01-14', 38, 1040, 'liam.clark@email.com', 4366),
+    ('Sophie Turner', 'sophie_turner', 'password17', 'User', '555 Blackberry St', '1994-12-03', 29, 990, 'sophie.turner@email.com', 641),
+    ('Noah Baker', 'noah_baker', 'password18', 'User', '666 Strawberry St', '2001-04-25', 22, 930, 'noah.baker@email.com', 3453),
+    ('Grace Hill', 'grace_hill', 'password19', 'User', '777 Cranberry St', '1986-08-10', 37, 1020, 'grace.hill@email.com', 55),
+    ('Logan Young', 'logan_young', 'password20', 'User', '888 Peach St', '1995-06-28', 26, 960, 'logan.young@email.com', 644);
+
+
+INSERT INTO PERSOANA (NUME, USERNAME, PAROLA, ROL, ADRESA, DATA_NASTERE, VARSTA, BUGET, EMAIL, CARD_FIDELITATE)
+VALUES
+    ('Sophia Davis', 'sophia_davis', 'password21', 'User', '999 Pine St', '1992-08-18', 30, 920, 'sophia.davis@email.com', 46),
+    ('William White', 'william_white', 'password22', 'User', '111 Oak St', '1988-05-15', 35, 1100, 'william.white@email.com', 463),
+    ('Oliver Wilson', 'oliver_wilson', 'password23', 'User', '222 Maple St', '2003-01-20', 20, 800, 'oliver.wilson@email.com', 87),
+    ('Emma Harris', 'emma_harris', 'password24', 'User', '333 Birch St', '1996-11-10', 26, 950, 'emma.harris@email.com', 9),
+    ('Liam Baker', 'liam_baker', 'password25', 'User', '444 Cedar St', '1981-03-25', 42, 1200, 'liam.baker@email.com', 6),
+    ('Ava Turner', 'ava_turner', 'password26', 'User', '555 Elm St', '1990-09-05', 31, 980, 'ava.turner@email.com', 335),
+    ('Noah Miller', 'noah_miller', 'password27', 'User', '666 Pine St', '2000-02-12', 23, 890, 'noah.miller@email.com', 13),
+    ('Sophie Clark', 'sophie_clark', 'password28', 'User', '777 Walnut St', '1987-12-18', 36, 1050, 'sophie.clark@email.com', 36),
+    ('Eva Brown', 'eva_brown', 'password29', 'User', '888 Oak St', '1994-04-10', 29, 970, 'eva.brown@email.com', 8),
+    ('Logan Young', 'logan_young', 'password30', 'User', '999 Pineapple St', '1998-06-28', 25, 930, 'logan.young@email.com', 65);
+
+INSERT INTO PERSOANA (NUME, USERNAME, PAROLA, ROL, ADRESA, DATA_NASTERE, VARSTA, BUGET, EMAIL, CARD_FIDELITATE)
+VALUES
+    ('Ethan Smith', 'ethan_smith', 'password31', 'User', '123 Apple St', '2010-05-01', 12, 500, 'ethan.smith@email.com', 77),
+    ('Olivia Johnson', 'olivia_johnson', 'password32', 'User', '456 Orange St', '2009-08-15', 13, 550, 'olivia.johnson@email.com', 76),
+    ('Liam Davis', 'liam_davis', 'password33', 'User', '789 Banana St', '2011-02-20', 11, 480, 'liam.davis@email.com', 325),
+    ('Ava Wilson', 'ava_wilson', 'password34', 'User', '101 Cherry St', '2012-11-10', 10, 520, 'ava.wilson@email.com', 75),
+    ('Mia Moore', 'mia_moore', 'password35', 'User', '202 Raspberry St', '2015-03-25', 8, 450, 'mia.moore@email.com', 23526);
